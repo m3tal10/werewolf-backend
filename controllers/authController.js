@@ -5,7 +5,6 @@ const { promisify } = require('util');
 const User = require('../models/userModel');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/AppError');
-const sendEmail = require('../utils/email');
 const Email = require('../utils/email');
 
 const createSendToken = (user, status, res) => {
@@ -15,7 +14,7 @@ const createSendToken = (user, status, res) => {
       Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000,
     ),
     httpOnly: true,
-    sameSite:'none'
+    sameSite: 'none',
   };
 
   if (process.env.NODE_ENV === 'production') cookieOptions.secure = true;
@@ -46,7 +45,6 @@ const verifyJWT = async (token) => {
 
 exports.signup = catchAsync(async (req, res, next) => {
   const newUser = await User.create({ ...req.body, role: 'user' });
-  const token = signJWTToken(newUser._id);
   await new Email(newUser).sendWelcome();
   createSendToken(newUser, 201, res);
 });
